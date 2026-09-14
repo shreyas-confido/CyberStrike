@@ -6,6 +6,16 @@
 
 $ErrorActionPreference = "Stop"
 
+# Session TLS 1.2 + permanent .NET defaults, same as install.ps1.
+try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+    foreach ($hive in @("HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319",
+                        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\.NETFramework\v4.0.30319")) {
+        Set-ItemProperty -Path $hive -Name "SystemDefaultTlsVersions" -Value 1 -Type DWord -ErrorAction Stop
+        Set-ItemProperty -Path $hive -Name "SchUseStrongCrypto" -Value 1 -Type DWord -ErrorAction Stop
+    }
+} catch {}
+
 $InstallDir = if ($env:CYBERSTRIKE_INSTALL_DIR) { $env:CYBERSTRIKE_INSTALL_DIR } else { "$env:LOCALAPPDATA\cyberstrike" }
 $DataDir = if ($env:XDG_DATA_HOME) {
     Join-Path $env:XDG_DATA_HOME "cyberstrike"

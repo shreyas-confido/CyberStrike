@@ -15,6 +15,18 @@ try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 } catch {}
 
+# Make TLS 1.2 the machine-wide .NET default (best effort; needs admin) so
+# future runs of the one-liner work without the manual prefix.
+try {
+    foreach ($hive in @("HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319",
+                        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\.NETFramework\v4.0.30319")) {
+        Set-ItemProperty -Path $hive -Name "SystemDefaultTlsVersions" -Value 1 -Type DWord -ErrorAction Stop
+        Set-ItemProperty -Path $hive -Name "SchUseStrongCrypto" -Value 1 -Type DWord -ErrorAction Stop
+    }
+} catch {
+    Write-Warn "Could not set machine-wide TLS 1.2 defaults (not admin?). The short one-liner will still need its Tls12 prefix on this box."
+}
+
 $Repo = if ($env:CYBERSTRIKE_REPO) { $env:CYBERSTRIKE_REPO } else { "shreyas-confido/CyberStrike" }
 $InstallDir = if ($env:CYBERSTRIKE_INSTALL_DIR) { $env:CYBERSTRIKE_INSTALL_DIR } else { "$env:LOCALAPPDATA\cyberstrike" }
 $Beta = $env:CYBERSTRIKE_BETA -eq "1"
