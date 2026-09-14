@@ -1,5 +1,7 @@
 # CyberStrike CLI Installer for Windows - shreyas-confido fork (Win10 1607 / Server 2016 compatible)
 # Usage: irm https://raw.githubusercontent.com/shreyas-confido/CyberStrike/win1607-compat/install.ps1 | iex
+# Fully automatic: removes any previous install (upstream or fork), installs,
+# updates PATH if needed, and verifies the binary launches.
 # Install upstream instead of the fork: $env:CYBERSTRIKE_REPO = "CyberStrikeus/CyberStrike"; then run the same command.
 
 $ErrorActionPreference = "Stop"
@@ -188,30 +190,24 @@ function Install-Cyberstrike {
 
     Write-Info "Installed to $DestPath"
 
-    # Check if install dir is in PATH
+    # Add install dir to PATH automatically if missing
     $UserPath = [Environment]::GetEnvironmentVariable("PATH", "User")
     if ($UserPath -notlike "*$InstallDir*") {
-        Write-Warn "$InstallDir is not in your PATH"
-        Write-Host ""
-        Write-Host "Add it to your PATH by running:" -ForegroundColor Cyan
-        Write-Host ""
-        Write-Host "  `$env:PATH = `"$InstallDir;`$env:PATH`""
-        Write-Host ""
-        Write-Host "Or permanently add it:" -ForegroundColor Cyan
-        Write-Host ""
-        Write-Host "  [Environment]::SetEnvironmentVariable('PATH', `"$InstallDir;`$env:PATH`", 'User')"
-        Write-Host ""
+        [Environment]::SetEnvironmentVariable("PATH", "$InstallDir;$UserPath", "User")
+        $env:PATH = "$InstallDir;$env:PATH"
+        Write-Info "Added $InstallDir to PATH. You may need to restart your terminal."
+    }
 
-        $addToPath = Read-Host "Would you like to add it to your PATH now? (Y/n)"
-        if ($addToPath -eq "" -or $addToPath -eq "Y" -or $addToPath -eq "y") {
-            [Environment]::SetEnvironmentVariable("PATH", "$InstallDir;$UserPath", "User")
-            $env:PATH = "$InstallDir;$env:PATH"
-            Write-Info "Added to PATH. You may need to restart your terminal."
-        }
+    # Verify the binary actually launches on this machine
+    Write-Info "Verifying installation (cyberstrike --version)..."
+    & $DestPath --version
+    $code = $LASTEXITCODE
+    if ($code -ne 0) {
+        Write-Err "cyberstrike.exe failed to start (exit code $code). Install is present but the binary did not launch."
     }
 
     Write-Host ""
-    Write-Info "CyberStrike CLI installed successfully!"
+    Write-Info "CyberStrike CLI installed successfully! (exit code 0 on verify)"
     Write-Host ""
     Write-Host "  Run 'cyberstrike --help' to get started" -ForegroundColor Cyan
     Write-Host ""
