@@ -66,7 +66,10 @@ Write-Host ""
 Write-Info "Remote URL:  https://$Domain"
 Write-Info "Auth:        HTTP Basic, user 'cyberstrike' + your CYBERSTRIKE_TUNNEL_PASSWORD"
 Write-Host ""
-Write-Host "  Test from any machine:" -ForegroundColor Cyan
+Write-Host "  TUI from another machine (opencode attach):" -ForegroundColor Cyan
+Write-Host "    opencode attach https://$Domain -u cyberstrike -p <password>" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  Or plain API:" -ForegroundColor Cyan
 Write-Host "    curl -u cyberstrike:<password> https://$Domain/session/ingest -d '{`"text`":`"hello`"}'" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Stop by closing the two spawned windows." -ForegroundColor Cyan
