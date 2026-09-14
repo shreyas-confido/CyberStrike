@@ -212,6 +212,14 @@ function Install-Cyberstrike {
         Write-Info "Added $InstallDir to PATH. You may need to restart your terminal."
     }
 
+    # Install the `cyberstrike-tunnel` command (whole stack: serve + ngrok)
+    $Shim = @'
+@echo off
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; irm https://raw.githubusercontent.com/shreyas-confido/CyberStrike/win1607-compat/tunnel.ps1 | iex"
+'@
+    Set-Content -Path (Join-Path $InstallDir "cyberstrike-tunnel.cmd") -Value $Shim
+    Write-Info "Command installed: type 'cyberstrike-tunnel' any time to spin up serve + ngrok"
+
     # Verify the binary actually launches on this machine
     Write-Info "Verifying installation (cyberstrike --version)..."
     & $DestPath --version

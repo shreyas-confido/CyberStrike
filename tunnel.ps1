@@ -49,6 +49,14 @@ if (-not (Test-Path $Ngrok)) {
     Invoke-WebRequest -Uri "https://github.com/shreyas-confido/CyberStrike/releases/latest/download/ngrok.exe" -OutFile $Ngrok -UseBasicParsing
 }
 
+# Install the `cyberstrike-tunnel` command (same dir as cyberstrike.exe, already on PATH)
+$Shim = @'
+@echo off
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; irm https://raw.githubusercontent.com/shreyas-confido/CyberStrike/win1607-compat/tunnel.ps1 | iex"
+'@
+Set-Content -Path (Join-Path $InstallDir "cyberstrike-tunnel.cmd") -Value $Shim
+Write-Info "Command installed: type 'cyberstrike-tunnel' any time to spin up the stack"
+
 # Child windows inherit this, so the server enforces the same credential remotely
 $env:CYBERSTRIKE_SERVER_PASSWORD = $Password
 
