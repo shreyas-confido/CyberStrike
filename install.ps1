@@ -1,5 +1,7 @@
 # CyberStrike CLI Installer for Windows - shreyas-confido fork (Win10 1607 / Server 2016 compatible)
-# Usage: irm https://raw.githubusercontent.com/shreyas-confido/CyberStrike/win1607-compat/install.ps1 | iex
+# Usage (the TLS 1.2 prefix is required on PS 5.1: it negotiates TLS 1.0 for the
+# initial fetch and GitHub rejects it, so the script cannot fix this itself):
+#   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; irm https://raw.githubusercontent.com/shreyas-confido/CyberStrike/win1607-compat/install.ps1 | iex
 # Fully automatic: removes any previous install (upstream or fork), installs,
 # updates PATH if needed, and verifies the binary launches.
 # Install upstream instead of the fork: $env:CYBERSTRIKE_REPO = "CyberStrikeus/CyberStrike"; then run the same command.

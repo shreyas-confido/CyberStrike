@@ -1,7 +1,8 @@
 # Uninstall the CyberStrike CLI - removes installs from upstream cyberstrike
 # or the shreyas-confido fork (identical paths, identical binary name).
 # Keeps user data/config and the PATH entry.
-# Usage: irm https://raw.githubusercontent.com/shreyas-confido/CyberStrike/win1607-compat/uninstall.ps1 | iex
+# Usage (TLS 1.2 prefix required on PS 5.1, see install.ps1):
+#   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; irm https://raw.githubusercontent.com/shreyas-confido/CyberStrike/win1607-compat/uninstall.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
