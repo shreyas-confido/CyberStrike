@@ -34,9 +34,13 @@ function Write-Err { param($Message) Write-Host "[ERROR] $Message" -ForegroundCo
 if (-not (Test-Path $Exe)) {
     Write-Err "cyberstrike.exe not found at $Exe - run install.ps1 first"
 }
-if (-not $env:NGROK_AUTHTOKEN) {
-    Write-Err "NGROK_AUTHTOKEN not set. One-time: [Environment]::SetEnvironmentVariable('NGROK_AUTHTOKEN','<token>','User'), then open a new PowerShell."
+if (-not $env:CYBERSTRIKE_NGROK_AUTHTOKEN -and -not $env:NGROK_AUTHTOKEN) {
+    Write-Err "CYBERSTRIKE_NGROK_AUTHTOKEN not set. One-time: [Environment]::SetEnvironmentVariable('CYBERSTRIKE_NGROK_AUTHTOKEN','<token>','User'), then open a new PowerShell. (NGROK_AUTHTOKEN also works but may collide with other tools on this box.)"
 }
+
+# bhc_artemas reads NGROK_AUTHTOKEN too (from Doppler), so this tunnel uses
+# its own var name to avoid the process-env collision.
+$NgrokToken = if ($env:CYBERSTRIKE_NGROK_AUTHTOKEN) { $env:CYBERSTRIKE_NGROK_AUTHTOKEN } else { $env:NGROK_AUTHTOKEN }
 
 $Password = $env:CYBERSTRIKE_TUNNEL_PASSWORD
 if (-not $Password) {
@@ -63,7 +67,7 @@ $env:CYBERSTRIKE_SERVER_PASSWORD = $Password
 Write-Info "Starting cyberstrike serve (window 1) and ngrok tunnel (window 2)..."
 
 $serverCmd = "& '$Exe' serve --port $Port"
-$ngrokCmd = "& '$Ngrok' http $Port --url=$Domain --authtoken $env:NGROK_AUTHTOKEN --basic-auth cyberstrike:$Password"
+$ngrokCmd = "& '$Ngrok' http $Port --url=$Domain --authtoken $NgrokToken --basic-auth cyberstrike:$Password"
 
 Start-Process powershell -ArgumentList @("-NoExit", "-Command", $serverCmd)
 Start-Process powershell -ArgumentList @("-NoExit", "-Command", $ngrokCmd)
